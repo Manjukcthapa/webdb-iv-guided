@@ -1,15 +1,31 @@
 const router = require('express').Router();
+const knexConfig = require('../knexfile')
 
-router.get('/', async (req, res) => {
-  try {
-    const tracks = await Tracks.find();
-    res.status(200).json(tracks);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'We ran into an error retrieving the tracks' });
-  }
+const knex = require('knex');
+
+const db = knex(knexConfig.development);
+
+router.get("/", (req, res) => {
+
+  db("tracks")
+    .then(dish => {
+      res.status(200).json(dish);
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
 });
+
+router.post('/', (req, res) => {
+  db('tracks')
+      .insert(req.body)
+      .then(result => {
+          res.json(result)
+      })
+      .catch(error => {
+          res.status(500).json({ message: 'Internal server error'})
+      })
+})
 
 router.get('/:id', async (req, res) => {
   try {
